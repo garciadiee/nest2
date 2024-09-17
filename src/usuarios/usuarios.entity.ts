@@ -15,6 +15,9 @@ email: string;
 @Column({ type: 'varchar', nullable: false, length:255})
 password: string;
 
+@Column({ type: 'varchar', nullable: false, length: 255 })
+avatar: string;
+
 @Column({ type: 'bool', default: true })
 isActive: boolean;
 

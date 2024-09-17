@@ -15,6 +15,7 @@ import { UsuariosService } from './usuarios.service';
 import { UsuarioDto } from './usuarios.dto';
 import { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { PaginationQueryDto } from 'src/common/paginator/pagination.dto';
 
 
 @Controller('usuarios')
@@ -46,6 +47,8 @@ async login(
     @Res() res: Response,
   ) {
     const result = await this.service.updateUser(id, user, files);
+    res.status(HttpStatus.OK).json({ok: true, result, msg: 'approved'});
+  
     [
       {
         fieldname: 'file',
@@ -54,8 +57,22 @@ async login(
         mimetype: 'image/png',
       },
     ];
+  }
 
+  
+  @Delete(':id')
+  async deleteUser(@Param('id') id: number, @Res() res: Response) {
+    const result = await this.service.deleteUser(id);
     res.status(HttpStatus.OK).json({ ok: true, result });
   }
-}
 
+  @Get(':id')
+  async getOne(@Param('id') id: number) {
+    return await this.service.getOne(id);
+  }
+
+  @Get()
+  async getAll(@Query() paginationQuery: PaginationQueryDto) {
+    return await this.service.getAll(paginationQuery);
+  }
+}

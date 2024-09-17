@@ -1,17 +1,17 @@
-import { HttpException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
 import { UsuarioDto } from "./usuarios.dto";
-import { QueryFailedError } from "typeorm";
+
 
 
 @Injectable()
 export class AuthService {
-
 /** 
  *  @param password user's password
  *  @returns hashed password
  */
+
 async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 12);
 }
@@ -22,6 +22,12 @@ async hashPassword(password: string): Promise<string> {
  * @param hashPassword stored user's password
  * @returns boolean
  */
+async validateUserPassword(
+    password: string,
+    hashedPassword: string,
+    ): Promise<boolean> {
+        return bcrypt.compare(password, hashedPassword);
+    }
  async comparePassword(
     password: string,
     hashPassword: string,

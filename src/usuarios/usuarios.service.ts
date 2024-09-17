@@ -4,6 +4,8 @@ import { Usuarios } from './usuarios.entity';
 import { QueryFailedError, Repository } from 'typeorm';
 import { UsuarioDto } from './usuarios.dto'
 import { AuthService } from './auth.service';
+import { PaginationQueryDto } from 'src/common/paginator/pagination.dto';
+
 
 
 @Injectable()
@@ -109,8 +111,11 @@ export class UsuariosService {
             user.avatar = files[0].filename;
           }
           const oldUser = await this.getOne(id);
+
           const mergeUser = await this.repo.merge(oldUser, user);
+
           const result = await this.repo.save(mergeUser);
+
           return result;
         } catch (err) {
           console.error(err);
