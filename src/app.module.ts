@@ -6,12 +6,20 @@ import { UsuariosModule } from './usuarios/usuarios.module';
 import { JwtMiddleware } from './usuarios/auth/middlewares/jwt/jwt.middleware';
 import { db } from './common';
 import { SocketModule } from './socket/socket.module';
+import { ParcelasModule } from './alquileres/parcelas/parcelas.module';
+import { IngresosModule } from './alquileres/ingresos/ingresos.module';
+import { ReservasModule } from './alquileres/reservas/reservas.module';
+import { DepartamentosModule } from './alquileres/departamentos/departamentos.module';
 
 @Module({
   imports: [/*configuraciones globales para toda la app**/
   TypeOrmModule.forRoot(db),
   UsuariosModule,
-  SocketModule
+  SocketModule,
+  ParcelasModule,
+  DepartamentosModule,
+  IngresosModule,
+  ReservasModule
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -31,6 +39,10 @@ export class AppModule implements NestModule{
         path: '/usuarios/auth/register',
         method: RequestMethod.POST
       },
+      {
+        path: 'reservas/:id/aceptar',
+        method: RequestMethod.PATCH,
+      }
     )
     .forRoutes('');
   }

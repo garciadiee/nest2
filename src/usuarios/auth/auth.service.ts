@@ -1,20 +1,28 @@
-import { Injectable, } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, UnauthorizedException, } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
-import { UsuarioDto } from "./usuarios.dto";
+import { UsuarioDto } from "../usuarios.dto";
+import { UsuariosService } from "../usuarios.service";
+import { Role } from "../usuarios.entity";
 
 
 
 @Injectable()
 export class AuthService {
-/** 
- *  @param password user's password
- *  @returns hashed password
- */
+    constructor(
+        private jwtService: JwtService,
+        @Inject(forwardRef(() => UsuariosService))
+        private userService: UsuariosService
+    ) { }
 
-async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 12);
-}
+    /**
+     * @param password new user's pasword
+     * @returns hashed password
+     */
+
+    async hashPassword(password: string): Promise<string> {
+        return bcrypt.hash(password, 12);
+    }
 
 /**
  * @description compares the login password with the stored
@@ -22,12 +30,15 @@ async hashPassword(password: string): Promise<string> {
  * @param hashPassword stored user's password
  * @returns boolean
  */
-async validateUserPassword(
+
+/*
+    async validateUserPassword(
     password: string,
     hashedPassword: string,
     ): Promise<boolean> {
         return bcrypt.compare(password, hashedPassword);
     }
+*/
  async comparePassword(
     password: string,
     hashPassword: string,
@@ -35,13 +46,12 @@ async validateUserPassword(
     return bcrypt.compare(password, hashPassword);
  }
 
- //*Funcion para verificar el token
- constructor(private jwtService: JwtService) {}
  /**
   * @description compare user session jwt
   * @param jwt jwt from client
   * @returns payload
   */
+
  async verifyJwt(jwt: string): Promise<any> {
      return await this.jwtService.verifyAsync(jwt);
  }
@@ -60,15 +70,25 @@ async validateUserPassword(
         sub: user.id,
         email: user.email,
         nombre: user.nombre,
+        role: user.role
     };
     //*Retornamos el token
     return this.jwtService.signAsync(payload);
  }
- //*Funcion que encuentre a un usuario
- /**
-  * @description Obtiene un usuario
-  * @param id ID del usuario
-  * @returns UsuarioDTO
-  */
- 
- }
+
+async verificarRol(role: Role, token: string) {
+    try{
+        const decodeUser = await this.verifyJwt(token);
+        const usuario = await this.userService.getOne(decodeUser.sub)
+
+        if(role === Role.USER){
+            throw new UnauthorizedException('${role} no tiene acceso')
+        }
+
+        return role.includes(usuario.role)
+    } catch (error) {
+        throw new UnauthorizedException('token invalido')
+    }
+}
+
+}

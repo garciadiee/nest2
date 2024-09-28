@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Usuarios } from './usuarios.entity';
 import { QueryFailedError, Repository } from 'typeorm';
 import { UsuarioDto } from './usuarios.dto'
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 import { PaginationQueryDto } from 'src/common/paginator/pagination.dto';
 
 
@@ -32,14 +32,17 @@ export class UsuariosService {
             throw new HttpException(err.messege, err.status);
         }
     }
+
     async login(email: string, pass: string) {
         try {
-          const user = await this.repo.findOne({ where: { email } });
+          const user = await this.repo.findOne({ where: { email },
+            select: {email:true, password: true, id: true, role: true,nombre: true}
+           });
           console.log(user);
     
           if (!user) throw new NotFoundException('Usuario no encontrado');
     
-          const isPassword = await this.authService.validateUserPassword(
+          const isPassword = await this.authService.comparePassword(
             pass,
             user.password,
           );
@@ -84,15 +87,21 @@ export class UsuariosService {
         page: number;
         limit: number;
       }> {
+
         const { page = 1, limit = 10 } = paginationQuery;
     
         try {
+
           const [usuarios, total] = await this.repo.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
+
           });
+
           if (!usuarios) throw new NotFoundException('User not found');
+
           return { data: usuarios, total, page, limit };
+
         } catch (err) {
           console.log(err);
           if (err instanceof QueryFailedError)
@@ -100,7 +109,7 @@ export class UsuariosService {
           throw new HttpException(err.message, err.status);
         }
       }
-    
+
       async updateUser(
         id: number,
         user: Partial<UsuarioDto>,
@@ -125,17 +134,17 @@ export class UsuariosService {
         }
       }
     
-      async deleteUser(id: number) {
+      async deleteUser(id: number): Promise<UsuarioDto> {
         try {
-          const user = await this.getOne(id);
-          const result = await this.repo.remove(user);
-          return result;
+          const user = await this.repo.findOne({ where: { id } })
+          const usuario = await this.repo.remove(user)
+          return usuario
+                    
         } catch (err) {
-          console.error(err);
+          console.error(err)
           if (err instanceof QueryFailedError)
             throw new HttpException(`${err.name} ${err.driverError}`, 404);
-          throw new HttpException(err.message, err.status);
+          throw new HttpException(err.message, err.status)
         }
       }
     }
-

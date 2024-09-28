@@ -1,4 +1,10 @@
+import { IsOptional } from "class-validator";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+
+export enum Role {
+    ADMIN = "ADMIN",
+    USER = "USER"  
+}
 
 @Entity('usuarios')
 export class Usuarios {
@@ -15,6 +21,10 @@ email: string;
 @Column({ type: 'varchar', nullable: false, length:255})
 password: string;
 
+@Column({type: 'enum', enum: Role, default: Role.USER })
+role: Role;
+
+@IsOptional()
 @Column({ type: 'varchar', nullable: false, length: 255 })
 avatar: string;
 

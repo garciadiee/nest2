@@ -13,7 +13,7 @@ export class SocketService {
 
   /**
    * @description
-   * Almacenamos el socket del usuario, identificado por el id unico generado
+   * Almacenamos el socket del usuario, identificado por el id generado
    */
   onConnection(socket: Socket, payload: Payload) {
     this.clients[socket.id] = { socket: socket, payload: payload };

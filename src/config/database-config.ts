@@ -8,6 +8,6 @@ export const db: TypeOrmModuleOptions = {
     password: envs.pass,
     database: envs.database,
     entities: [],
-    autoLoadEntities: true, //Carga entidades
-    synchronize: true, //Realiza migraciones de la tabla
-};
+    autoLoadEntities: true, //carga las entidades
+    synchronize: true, //migraciones de las tablas
+}

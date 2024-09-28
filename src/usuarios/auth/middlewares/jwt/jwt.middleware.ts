@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
-import { AuthService } from 'src/usuarios/auth.service';
+import { AuthService } from 'src/usuarios/auth/auth.service';
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {

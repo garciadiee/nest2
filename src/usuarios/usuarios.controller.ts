@@ -22,7 +22,8 @@ import { PaginationQueryDto } from 'src/common/paginator/pagination.dto';
 export class UsuariosController {
     constructor(private readonly service: UsuariosService) {}
 
-@Post()
+
+@Post('auth/register')
 async register(@Body() usuario: UsuarioDto, @Res() response: Response) {
         const result = await this.service.register(usuario);
         response
@@ -35,7 +36,8 @@ async login(
     @Body() usuario: { email: string; pass: string },
     @Res() res: Response,
 ){
-    
+  const token = await this.service.login(usuario.email, usuario.pass);
+  res.status(HttpStatus.OK).json({ ok: true, token, msg: 'approved' });  
 }
 
 @Patch(':id')
@@ -48,17 +50,19 @@ async login(
   ) {
     const result = await this.service.updateUser(id, user, files);
     res.status(HttpStatus.OK).json({ok: true, result, msg: 'approved'});
-  
-    [
-      {
-        fieldname: 'file',
-        originalname: 'test.png',
-        encoding: '7bit',
-        mimetype: 'image/png',
-      },
-    ];
   }
 
+  @Get('/')
+  async getAll(@Query() paginationQuery: PaginationQueryDto, @Res() res: Response) {
+    const usuario = await this.service.getAll(paginationQuery);
+    res.status(HttpStatus.OK).json({ ok: true, usuario, msg: 'approved' });
+  }
+
+  @Get(':id')
+  async getOne(@Param('id') id: number, @Res() res: Response) {
+    const usuario = await this.service.getOne(id);
+    res.status(HttpStatus.OK).json({ ok: true, usuario, msg: 'approved' });
+  }
   
   @Delete(':id')
   async deleteUser(@Param('id') id: number, @Res() res: Response) {
@@ -66,13 +70,4 @@ async login(
     res.status(HttpStatus.OK).json({ ok: true, result });
   }
 
-  @Get(':id')
-  async getOne(@Param('id') id: number) {
-    return await this.service.getOne(id);
-  }
-
-  @Get()
-  async getAll(@Query() paginationQuery: PaginationQueryDto) {
-    return await this.service.getAll(paginationQuery);
-  }
 }
